@@ -1,29 +1,41 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-	entry   : './src/index.ts', // 入口文件路径
+	entry   : './src/index.ts',
 	mode    : 'development',
 	devtool : 'source-map',
 	output  : {
-		path     : path.resolve(__dirname, 'dist'), // 打包输出目录
-		filename : 'bundle.js' // 输出文件名
+		path     : path.resolve(__dirname, 'dist'),
+		filename : 'bundle.js'
 	},
 	resolve : {
-		extensions : [ '.ts', '.js' ] // 支持的文件扩展名
+		extensions : [ '.ts', '.js' ]
 	},
 	module : {
 		rules : [
 			{
-				test    : /\.ts$/, // 匹配所有.ts文件
-				exclude : /node_modules/, // 排除node_modules目录
+				test    : /\.ts$/,
+				exclude : /node_modules/,
 				use     : {
-					loader : 'ts-loader' // 使用ts-loader处理TypeScript代码
+					loader : 'ts-loader'
 				}
 			}
 		]
 	},
 	plugins : [
-		new CleanWebpackPlugin() // 清除输出目录
-	]
+		new CleanWebpackPlugin(),
+		new HtmlWebpackPlugin({
+			template : './example/index.html'
+		})
+	],
+	devServer : {
+		static : {
+			directory : path.resolve(__dirname, 'example')
+		},
+		compress : true,
+		port     : 3000
+		
+	}
 };

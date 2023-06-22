@@ -18,7 +18,6 @@ class LoggerModule {
 	info(message: string) {
 		const timestamp = Utils.getFormattedDate();
 
-		// this.Console && console.log(`${timestamp} - ${this.prefix}[Info] [${this.moduleName}] ${message}`);
 		this.Console && console.log(`${ timestamp } - ${ this.prefix }[Info] [${ this.moduleName }] ${ message}`);
 		this.Logger(this.moduleName, 'Info', message);
 	}
@@ -26,7 +25,6 @@ class LoggerModule {
 	warn(message: string) {
 		const timestamp = Utils.getFormattedDate();
 
-		// this.Console && console.log(`${timestamp} - ${this.prefix}[Warn] [${this.moduleName}] ${message}`);
 		this.Console && console.log(`%c${ timestamp } - ${ this.prefix }[Warn] [${ this.moduleName }] ${ message}`, 'color: orange');
 		this.Logger(this.moduleName, 'Warn', message);
 	}

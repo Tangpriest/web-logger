@@ -249,13 +249,11 @@ var LoggerModule = /** @class */ (function () {
     }
     LoggerModule.prototype.info = function (message) {
         var timestamp = utils_1.default.getFormattedDate();
-        // this.Console && console.log(`${timestamp} - ${this.prefix}[Info] [${this.moduleName}] ${message}`);
         this.Console && console.log("".concat(timestamp, " - ").concat(this.prefix, "[Info] [").concat(this.moduleName, "] ").concat(message));
         this.Logger(this.moduleName, 'Info', message);
     };
     LoggerModule.prototype.warn = function (message) {
         var timestamp = utils_1.default.getFormattedDate();
-        // this.Console && console.log(`${timestamp} - ${this.prefix}[Warn] [${this.moduleName}] ${message}`);
         this.Console && console.log("%c".concat(timestamp, " - ").concat(this.prefix, "[Warn] [").concat(this.moduleName, "] ").concat(message), 'color: orange');
         this.Logger(this.moduleName, 'Warn', message);
     };
