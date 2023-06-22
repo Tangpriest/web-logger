@@ -1,3 +1,4 @@
+import { filterCondition } from './type';
 declare class Logger {
     private CollectionName;
     private DatabaseName;
@@ -19,7 +20,7 @@ declare class Logger {
     initModules(modules: string[]): void;
     createTable(): void;
     logger(module: string, level: string, content: string): void;
-    getLogs(test: any, successCallback: any, errorCallback: any): void;
+    getLogs(condition: filterCondition, successCallback: any, errorCallback: any): void;
 }
 declare global {
     interface Window {

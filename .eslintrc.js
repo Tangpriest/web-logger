@@ -1,39 +1,33 @@
 /* eslint-disable */
-module.exports =
-{
-  env:
-  {
+module.exports = {
+  env: {
     es6: true,
     node: true
   },
-  extends:
-    [
-      'eslint:recommended'
-    ],
+  parser: "@typescript-eslint/parser",
+  plugins: ["@typescript-eslint"],
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
   settings: {},
-  parserOptions:
-  {
-    ecmaVersion: 2020,
+  parserOptions: {
+    ecmaVersion: 2022,
     sourceType: 'module',
-    ecmaFeatures:
-    {
+    ecmaFeatures: {
       impliedStrict: true
     }
   },
-  rules:
-  {
-    'array-bracket-spacing': [2, 'always',
-      {
-        objectsInArrays: true,
-        arraysInArrays: true
-      }],
-    //箭头函数是否一定需要括号
+  rules: {
+    'array-bracket-spacing': [2, 'always', {
+      objectsInArrays: true,
+      arraysInArrays: true
+    }],
     'arrow-parens': [0, 'always'],
     'arrow-spacing': 2,
     'block-spacing': [2, 'always'],
-    //块函数样式
     'brace-style': [2, 'stroustrup', { allowSingleLine: true }],
-    'camelcase': 0,
+    camelcase: 0,
     'comma-dangle': 2,
     'comma-spacing': [2, { before: false, after: true }],
     'comma-style': 2,
@@ -42,46 +36,41 @@ module.exports =
     'func-call-spacing': 2,
     'generator-star-spacing': 2,
     'guard-for-in': 2,
-    'indent': [
+    indent: [
       1,
       'tab',
       {
-        'SwitchCase': 1,
-        'VariableDeclarator': 1
-      }],
-    'key-spacing': [2,
-      {
-        singleLine:
-        {
-          beforeColon: true,
-          afterColon: true
-        },
-        multiLine:
-        {
-          beforeColon: true,
-          afterColon : true,
-          align      : 'colon'
-        }
-      }],
-      
+        SwitchCase: 1,
+        VariableDeclarator: 1
+      }
+    ],
+    'key-spacing': [2, {
+      singleLine: {
+        beforeColon: true,
+        afterColon: true
+      },
+      multiLine: {
+        beforeColon: true,
+        afterColon: true,
+        align: 'colon'
+      }
+    }],
     'keyword-spacing': 2,
     'linebreak-style': [0, 'unix'],
-    'lines-around-comment': [2,
-      {
-        allowBlockStart: true,
-        allowObjectStart: true,
-        beforeBlockComment: true,
-        beforeLineComment: false
-      }],
-    'max-len': [2, 200,
-      {
-        tabWidth: 2,
-        comments: 200,
-        ignoreUrls: true,
-        ignoreStrings: true,
-        ignoreTemplateLiterals: true,
-        ignoreRegExpLiterals: true
-      }],
+    'lines-around-comment': [2, {
+      allowBlockStart: true,
+      allowObjectStart: true,
+      beforeBlockComment: true,
+      beforeLineComment: false
+    }],
+    'max-len': [2, 200, {
+      tabWidth: 2,
+      comments: 200,
+      ignoreUrls: true,
+      ignoreStrings: true,
+      ignoreTemplateLiterals: true,
+      ignoreRegExpLiterals: true
+    }],
     'newline-after-var': 2,
     'newline-before-return': 2,
     'newline-per-chained-call': 2,
@@ -168,22 +157,22 @@ module.exports =
     'prefer-rest-params': 2,
     'prefer-spread': 2,
     'prefer-template': 2,
-    'quotes': [2, 'single', { avoidEscape: true }],
-    'semi': [0, 'always'],
+    quotes: [2, 'single', { avoidEscape: true }],
+    semi: [0, 'always'],
     'semi-spacing': 2,
     'space-before-blocks': 2,
-    'space-before-function-paren': [2,
-      {
-        anonymous: 'never',
-        named: 'never',
-        asyncArrow: 'always'
-      }],
+    'space-before-function-paren': [2, {
+      anonymous: 'never',
+      named: 'never',
+      asyncArrow: 'always'
+    }],
     'space-in-parens': [2, 'never'],
     'spaced-comment': [2, 'always'],
-    'strict': 2,
+    strict: 2,
     'valid-typeof': 2,
-    'yoda': 2,
-
-    'multiline-ternary': ["error", "always"]
+    yoda: 2,
+    'multiline-ternary': ["error", "always"],
+    '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/no-var-requires':0
   }
 };

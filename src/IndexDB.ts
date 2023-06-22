@@ -1,3 +1,4 @@
+import { filterCondition } from './type';
 class IndexedDBDatabase {
 	private prefix: string;
 	private databaseName: string;
@@ -17,6 +18,7 @@ class IndexedDBDatabase {
 
 			request.onerror = (event) => {
 				const error = (event.target as IDBOpenDBRequest).error;
+
 				console.error(`${this.prefix} Failed to open database: ${error}`);
 				reject(error);
 			};
@@ -32,9 +34,9 @@ class IndexedDBDatabase {
 
 				if (!db.objectStoreNames.contains(this.objectStoreName)) {
 
-					const OS = db.createObjectStore(this.objectStoreName, { keyPath: 'id', autoIncrement: true });
+					const OS = db.createObjectStore(this.objectStoreName, { keyPath : 'id', autoIncrement : true });
 
-					OS.createIndex('byId', 'id', { unique: true });
+					OS.createIndex('byId', 'id', { unique : true });
 					OS.createIndex('byTimestamp', 'timestamp');
 					OS.createIndex('byModule', 'module');
 					OS.createIndex('byUserId', 'userId');
@@ -108,12 +110,20 @@ class IndexedDBDatabase {
 		});
 	}
 
-	selectData(condition: any, successCallback: any, errorCallback: any) {
+	selectData(condition: filterCondition, successCallback: any, errorCallback: any) {
 		return new Promise<any[]>((resolve, reject) => {
 			const objectStore = this.createTransaction('readonly');
 			const results: any[] = [];
 
-			const request = objectStore.openCursor();
+			console.log(condition)
+			let request
+
+			if (condition && condition.startTime && condition.endTime) {
+				request = objectStore.index('byTimestamp').openCursor(IDBKeyRange.bound(condition.startTime, condition.endTime));
+			}
+			else {
+				request = objectStore.openCursor();
+			}
 
 			request.onsuccess = (event: any) => {
 				const cursor = event.target.result;

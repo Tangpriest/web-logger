@@ -1,6 +1,9 @@
 class Utils {
-	static getFormattedDate(): string {
-		const currentDate = new Date();
+	static getFormattedDate(time ?: string): string {
+		const transactionDate = time
+			? new Date(time)
+			: new Date();
+		const currentDate = transactionDate;
 
 		const year = currentDate.getFullYear();
 		const month = String(currentDate.getMonth() + 1).padStart(2, '0'); 

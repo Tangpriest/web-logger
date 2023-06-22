@@ -1,4 +1,5 @@
 import IndexedDBDatabase from './IndexDB';
+import { filterCondition } from './type';
 import Utils from './utils';
 
 class LoggerModule {
@@ -77,9 +78,7 @@ class Logger {
 
 	initModules(modules: string[]) {
 		modules.forEach((module) => {
-			this[module] = new LoggerModule({ moduleName: module, Logger: this.logger.bind(this) }) as any;
-
-			// this[module] = new LoggerModule({ moduleName: module, Logger: this.logger.bind(this) });
+			this[module] = new LoggerModule({ moduleName : module, Logger : this.logger.bind(this) }) as any;
 		});
 	}
 
@@ -96,14 +95,14 @@ class Logger {
 
 	logger(module: string, level: string, content: string) {
 		const data = {
-			userId: this.UserId,
-			clientId: this.ClientId,
-			module: module,
-			level: level,
-			timestamp: Utils.getFormattedDate(),
-			message: content,
-			isUpload: false,
-			data: { key: 'value' }
+			userId    : this.UserId,
+			clientId  : this.ClientId,
+			module    : module,
+			level     : level,
+			timestamp : Utils.getFormattedDate(),
+			message   : content,
+			isUpload  : false,
+			data      : { key : 'value' }
 		};
 
 		this.dbClient
@@ -116,11 +115,12 @@ class Logger {
 			});
 	}
 
-	getLogs(test: any, successCallback: any, errorCallback: any) {
+	getLogs(condition: filterCondition, successCallback: any, errorCallback: any) {
 		// const condition = new Date().toISOString(); // 获取当前时间
 
-		this.dbClient.selectData({
-			userId: 'Huangliang'
+		this.dbClient.selectData(condition = {
+			startTime : Utils.getFormattedDate('1970-01-01 00:00:00.000'),
+			endTime   : Utils.getFormattedDate()
 		}, successCallback, errorCallback)
 			.then((logs) => {
 				console.log(`${this.prefix}Logs retrieved successfully:`, logs);
@@ -129,17 +129,6 @@ class Logger {
 				console.error(`${this.prefix}Error retrieving logs:`, error);
 			});
 	}
-
-	// exportLogs() {
-	// 	this.dbClient
-	// 		.exportData(this.CollectionName)
-	// 		.then(() => {
-	// 			console.log(`${this.prefix}Logs exported successfully.`);
-	// 		})
-	// 		.catch((error: any) => {
-	// 			console.error(`${this.prefix}Error exporting logs:`, error);
-	// 		});
-	// }
 }
 
 declare global {
