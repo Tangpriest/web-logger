@@ -1,5 +1,5 @@
 class Utils {
-	static getFormattedDate() {
+	static getFormattedDate(): string {
 		const currentDate = new Date();
 
 		const year = currentDate.getFullYear();
@@ -12,11 +12,10 @@ class Utils {
 
 		const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 
-		return formattedDate
-
+		return formattedDate;
 	}
 
-	static generateRandomString(length) {
+	static generateRandomString(length: number): string {
 		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		let result = '';
   
@@ -30,4 +29,4 @@ class Utils {
 	}
 }
 
-module.exports = Utils
+export = Utils;

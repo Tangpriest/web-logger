@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "watch" : " ./node_modules/.bin/webpack --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,6 +13,7 @@
     "@babel/core": "^7.22.5",
     "@babel/preset-env": "^7.22.5",
     "babel-loader": "^9.1.2",
+    "clean-webpack-plugin": "^4.0.0",
     "eslint": "^8.43.0",
     "ts-loader": "^9.4.3",
     "typescript": "^5.1.3",

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Logger = new window.Logger({
 	CollectionName  : 'logs',
 	DatabaseName    : 'MyDatabase',

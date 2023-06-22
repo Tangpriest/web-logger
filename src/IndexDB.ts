@@ -1,5 +1,10 @@
 class IndexedDBDatabase {
-	constructor(databaseName, objectStoreName) {
+	private prefix: string;
+	private databaseName: string;
+	private objectStoreName: string;
+	private db: any;
+
+	constructor(databaseName: string, objectStoreName: string) {
 		this.prefix = '[LogIndexedDBSDK] :';
 		this.databaseName = databaseName;
 		this.objectStoreName = objectStoreName;
@@ -7,45 +12,46 @@ class IndexedDBDatabase {
 	}
 
 	openDatabase() {
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			const request = window.indexedDB.open(this.databaseName);
 
 			request.onerror = (event) => {
-				console.error(`${this.prefix} Failed to open database: ${event.target.error}`);
-				reject(event.target.error);
+				const error = (event.target as IDBOpenDBRequest).error;
+				console.error(`${this.prefix} Failed to open database: ${error}`);
+				reject(error);
 			};
 
 			request.onsuccess = (event) => {
-				this.db = event.target.result;
+				this.db = (event.target as IDBOpenDBRequest).result
 				console.log(`${this.prefix} Open database ${this.databaseName} successfully.`);
 				resolve();
 			};
 
 			request.onupgradeneeded = (event) => {
-				const db = event.target.result;
+				const db = (event.target as IDBOpenDBRequest).result;
 
 				if (!db.objectStoreNames.contains(this.objectStoreName)) {
 
-					const OS = db.createObjectStore(this.objectStoreName, { keyPath : 'id', autoIncrement : true })
+					const OS = db.createObjectStore(this.objectStoreName, { keyPath: 'id', autoIncrement: true });
 
-					OS.createIndex('byId', 'id', { unique : true })
-					OS.createIndex('byTimestamp', 'timestamp')
-					OS.createIndex('byModule', 'module')
-					OS.createIndex('byUserId', 'userId')
-					OS.createIndex('byClientId', 'clientId')
+					OS.createIndex('byId', 'id', { unique: true });
+					OS.createIndex('byTimestamp', 'timestamp');
+					OS.createIndex('byModule', 'module');
+					OS.createIndex('byUserId', 'userId');
+					OS.createIndex('byClientId', 'clientId');
 				}
 			};
 		});
 	}
 
-	executeQuery(request, successCallback, errorCallback) {
-		request.onsuccess = (event) => {
+	executeQuery(request: any, successCallback: any, errorCallback: any) {
+		request.onsuccess = (event: any) => {
 			if (successCallback) {
 				successCallback(event.target.result);
 			}
 		};
 
-		request.onerror = (event) => {
+		request.onerror = (event: any) => {
 			console.error(`${this.prefix} Error executing query: ${event.target.error}`);
 			if (errorCallback) {
 				errorCallback(event.target.error);
@@ -53,15 +59,15 @@ class IndexedDBDatabase {
 		};
 	}
 
-	createTransaction(mode) {
+	createTransaction(mode: string) {
 		const transaction = this.db.transaction(this.objectStoreName, mode);
-		
+
 		return transaction.objectStore(this.objectStoreName);
 	}
 
-	createTable(successCallback, errorCallback) {
+	createTable(successCallback?: any, errorCallback?: any) {
 
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			const request = this.openDatabase();
 
 			request.then(() => {
@@ -80,8 +86,8 @@ class IndexedDBDatabase {
 		});
 	}
 
-	insertData(data, successCallback, errorCallback) {
-		return new Promise((resolve, reject) => {
+	insertData(data: any, successCallback?: any, errorCallback?: any) {
+		return new Promise<void>((resolve, reject) => {
 			const objectStore = this.createTransaction('readwrite');
 			const request = objectStore.add(data);
 
@@ -92,7 +98,7 @@ class IndexedDBDatabase {
 				if (successCallback) {
 					successCallback();
 				}
-			}, (error) => {
+			}, (error : any) => {
 				reject(error);
 
 				if (errorCallback) {
@@ -102,56 +108,56 @@ class IndexedDBDatabase {
 		});
 	}
 
-	selectData(condition, successCallback, errorCallback) {
-		return new Promise((resolve, reject) => {
+	selectData(condition: any, successCallback: any, errorCallback: any) {
+		return new Promise<any[]>((resolve, reject) => {
 			const objectStore = this.createTransaction('readonly');
-			const results = [];
-    
+			const results: any[] = [];
+
 			const request = objectStore.openCursor();
-  
-			request.onsuccess = (event) => {
+
+			request.onsuccess = (event: any) => {
 				const cursor = event.target.result;
-  
+
 				if (cursor) {
 					const logEntry = cursor.value;
-					
+
 					if (
 						(!condition.module || logEntry.module === condition.module) &&
-            (!condition.level || logEntry.level === condition.level) &&
-            (!condition.userId || logEntry.userId === condition.userId) &&
-            (!condition.clientId || logEntry.clientId === condition.clientId)
+						(!condition.level || logEntry.level === condition.level) &&
+						(!condition.userId || logEntry.userId === condition.userId) &&
+						(!condition.clientId || logEntry.clientId === condition.clientId)
 					) {
 						results.push(logEntry);
 					}
-  
+
 					cursor.continue();
 				}
 				else {
 					console.log(`${this.prefix} Selected data:`, results);
 					resolve(results);
-  
+
 					if (successCallback) {
 						successCallback(results);
 					}
 				}
 			};
-  
-			request.onerror = (event) => {
+
+			request.onerror = (event: any) => {
 				reject(event.target.error);
-  
+
 				if (errorCallback) {
 					errorCallback(event.target.error);
 				}
 			};
 		});
 	}
-  
-	updateData(condition, newData, successCallback, errorCallback) {
-		return new Promise((resolve, reject) => {
+
+	updateData(condition: any, newData: any, successCallback: any, errorCallback: any) {
+		return new Promise<void>((resolve, reject) => {
 			const objectStore = this.createTransaction('readwrite');
 			const request = objectStore.openCursor(IDBKeyRange.only(condition));
 
-			request.onsuccess = (event) => {
+			request.onsuccess = (event: any) => {
 				const cursor = event.target.result;
 
 				if (cursor) {
@@ -164,7 +170,7 @@ class IndexedDBDatabase {
 						if (successCallback) {
 							successCallback();
 						}
-					}, (error) => {
+					}, (error:any) => {
 						reject(error);
 
 						if (errorCallback) {
@@ -182,7 +188,7 @@ class IndexedDBDatabase {
 				}
 			};
 
-			request.onerror = (event) => {
+			request.onerror = (event: any) => {
 				reject(event.target.error);
 
 				if (errorCallback) {
@@ -192,12 +198,12 @@ class IndexedDBDatabase {
 		});
 	}
 
-	deleteData(condition, successCallback, errorCallback) {
-		return new Promise((resolve, reject) => {
+	deleteData(condition: any, successCallback: any, errorCallback: any) {
+		return new Promise<void>((resolve, reject) => {
 			const objectStore = this.createTransaction('readwrite');
 			const request = objectStore.openCursor(IDBKeyRange.only(condition));
 
-			request.onsuccess = (event) => {
+			request.onsuccess = (event: any) => {
 				const cursor = event.target.result;
 
 				if (cursor) {
@@ -210,7 +216,7 @@ class IndexedDBDatabase {
 						if (successCallback) {
 							successCallback();
 						}
-					}, (error) => {
+					}, (error:any) => {
 						reject(error);
 
 						if (errorCallback) {
@@ -228,7 +234,7 @@ class IndexedDBDatabase {
 				}
 			};
 
-			request.onerror = (event) => {
+			request.onerror = (event: any) => {
 				reject(event.target.error);
 
 				if (errorCallback) {
@@ -239,4 +245,4 @@ class IndexedDBDatabase {
 	}
 }
 
-module.exports = IndexedDBDatabase;
+export = IndexedDBDatabase;
