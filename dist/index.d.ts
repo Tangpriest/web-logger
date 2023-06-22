@@ -1,4 +1,4 @@
-import { filterCondition } from './type';
+import { FilterProps, LoggerProps } from './type';
 declare class Logger {
     private CollectionName;
     private DatabaseName;
@@ -8,19 +8,13 @@ declare class Logger {
     private prefix;
     private dbClient;
     [key: string]: any;
-    constructor(props: {
-        CollectionName?: string;
-        DatabaseName?: string;
-        ObjectStoreName?: string;
-        UserId?: string;
-        ClientId?: string;
-        Modules?: string[];
-    });
+    constructor(props: LoggerProps);
     connect(): void;
     initModules(modules: string[]): void;
     createTable(): void;
-    logger(module: string, level: string, content: string): void;
-    getLogs(condition: filterCondition, successCallback: any, errorCallback: any): void;
+    writeLogEntry(module: string, level: string, content: string, timestamp: string): void;
+    getFilteredLogEntries(condition: FilterProps, successCallback: any, errorCallback: any): void;
+    updateConfig(config: FilterProps): void;
 }
 declare global {
     interface Window {

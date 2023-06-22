@@ -1,24 +1,50 @@
 import IndexedDBDatabase from './IndexDB';
-import { filterCondition } from './type';
+import { FilterProps, LoggerProps } from './type';
 import Utils from './utils';
 
 class LoggerModule {
 	private moduleName: string;
 	private Logger: any;
+	private Console: boolean;
+	private prefix: string;
 
-	constructor({ moduleName, Logger }: { moduleName: string, Logger: any }) {
+	constructor({ moduleName, Logger, Console }: { moduleName: string, Logger: any, Console:boolean }) {
 		this.moduleName = moduleName;
 		this.Logger = Logger;
+		this.Console = Console;
+		this.prefix = '[LogModule] : ';
 	}
 
 	info(message: string) {
-		console.log(`[Info] [${this.moduleName}] ${message}`);
+		const timestamp = Utils.getFormattedDate();
+
+		// this.Console && console.log(`${timestamp} - ${this.prefix}[Info] [${this.moduleName}] ${message}`);
+		this.Console && console.log(`${ timestamp } - ${ this.prefix }[Info] [${ this.moduleName }] ${ message}`);
 		this.Logger(this.moduleName, 'Info', message);
 	}
 
 	warn(message: string) {
-		console.log(`[Warn] [${this.moduleName}] ${message}`);
+		const timestamp = Utils.getFormattedDate();
+
+		// this.Console && console.log(`${timestamp} - ${this.prefix}[Warn] [${this.moduleName}] ${message}`);
+		this.Console && console.log(`%c${ timestamp } - ${ this.prefix }[Warn] [${ this.moduleName }] ${ message}`, 'color: orange');
 		this.Logger(this.moduleName, 'Warn', message);
+	}
+
+	error(message: string) {
+		const timestamp = Utils.getFormattedDate();
+
+		// this.Console && console.log(`${timestamp} - ${this.prefix}[Error] [${this.moduleName}] ${message}`);
+		this.Console && console.log(`%c${ timestamp } - ${ this.prefix }[Error] [${ this.moduleName }] ${ message}`, 'color: red');
+		this.Logger(this.moduleName, 'Error', message);
+	}
+
+	debug(message: string) {
+		const timestamp = Utils.getFormattedDate();
+
+		// this.Console && console.log(`${timestamp} - ${this.prefix}[Debug] [${this.moduleName}] ${message}`);
+		this.Console && console.log(`%c${ timestamp } - ${ this.prefix }[Debug] [${ this.moduleName }] ${ message}`, 'color: blue');
+		this.Logger(this.moduleName, 'Debug', message);
 	}
 }
 
@@ -30,23 +56,17 @@ class Logger {
 	private ClientId: string;
 	private prefix: string;
 	private dbClient!: IndexedDBDatabase;
-	[key: string]: any; // 添加索引签名，允许任意属性
-
-	constructor(props: {
-		CollectionName?: string,
-		DatabaseName?: string,
-		ObjectStoreName?: string,
-		UserId?: string,
-		ClientId?: string,
-		Modules?: string[],
-	}) {
+	[key: string]: any; 
+	
+	constructor(props: LoggerProps) {
 		const {
 			CollectionName = 'logs',
-			DatabaseName = 'MyDatabase',
+			DatabaseName = 'WEB_LOGS',
 			ObjectStoreName = 'logs',
 			UserId = 'UNKNOWN',
 			ClientId = 'UNKNOWN',
-			Modules = []
+			Modules = [],
+			Mode = 'development'
 		} = props;
 
 		this.CollectionName = CollectionName;
@@ -54,31 +74,33 @@ class Logger {
 		this.ObjectStoreName = ObjectStoreName;
 		this.UserId = UserId;
 		this.ClientId = ClientId;
-
-		console.log(this.ClientId);
-
+		this.Mode = Mode;
+		this.Console = this.Mode === 'development'
 		this.prefix = '[LogSystem] : ';
-		console.log(`${this.prefix}Logger initialized.`);
+		this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Logger initialized.`);
+		if (!this.Console) {
+			console.log('Logger Mode is production, no logs will be printed to console.')
+		}
 		this.connect();
 		this.initModules(Modules);
 	}
 
 	connect() {
-		this.dbClient = new IndexedDBDatabase(this.DatabaseName, this.ObjectStoreName);
+		this.dbClient = new IndexedDBDatabase(this.DatabaseName, this.ObjectStoreName, this.Console);
 		this.dbClient
 			.openDatabase()
 			.then(() => {
-				console.log(`${this.prefix}Connected to IndexedDB.`);
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Connected to IndexedDB.`);
 				this.createTable();
 			})
 			.catch((error: any) => {
-				console.error(`${this.prefix}Error connecting to IndexedDB:`, error);
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error connecting to IndexedDB:`, error);
 			});
 	}
 
 	initModules(modules: string[]) {
 		modules.forEach((module) => {
-			this[module] = new LoggerModule({ moduleName : module, Logger : this.logger.bind(this) }) as any;
+			this[module] = new LoggerModule({ moduleName : module, Logger : this.writeLogEntry.bind(this), Console : this.Console }) as any;
 		});
 	}
 
@@ -86,20 +108,20 @@ class Logger {
 		this.dbClient
 			.createTable()
 			.then(() => {
-				console.log(`${this.prefix}Logs table created successfully.`);
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Logs table created successfully.`);
 			})
 			.catch((error: any) => {
-				console.error(`${this.prefix}Error creating logs table:`, error);
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error creating logs table:`, error);
 			});
 	}
 
-	logger(module: string, level: string, content: string) {
+	writeLogEntry(module: string, level: string, content: string, timestamp : string) {
 		const data = {
 			userId    : this.UserId,
 			clientId  : this.ClientId,
 			module    : module,
 			level     : level,
-			timestamp : Utils.getFormattedDate(),
+			timestamp : timestamp,
 			message   : content,
 			isUpload  : false,
 			data      : { key : 'value' }
@@ -108,26 +130,30 @@ class Logger {
 		this.dbClient
 			.insertData(data)
 			.then(() => {
-				console.log(`${this.prefix}Log inserted successfully.`);
+				// this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Log inserted successfully.`);
 			})
 			.catch((error: any) => {
-				console.error(`${this.prefix}Error inserting log:`, error);
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error inserting log:`, error);
 			});
 	}
 
-	getLogs(condition: filterCondition, successCallback: any, errorCallback: any) {
-		// const condition = new Date().toISOString(); // 获取当前时间
+	getFilteredLogEntries(condition: FilterProps, successCallback: any, errorCallback: any) {
 
 		this.dbClient.selectData(condition = {
 			startTime : Utils.getFormattedDate('1970-01-01 00:00:00.000'),
 			endTime   : Utils.getFormattedDate()
 		}, successCallback, errorCallback)
 			.then((logs) => {
-				console.log(`${this.prefix}Logs retrieved successfully:`, logs);
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Logs retrieved successfully:`, logs);
 			})
 			.catch((error: any) => {
-				console.error(`${this.prefix}Error retrieving logs:`, error);
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error retrieving logs:`, error);
 			});
+	}
+
+	updateConfig(config : FilterProps) {
+		this.UserId = config.userId || this.UserId;
+		this.ClientId = config.clientId || this.ClientId;
 	}
 }
 

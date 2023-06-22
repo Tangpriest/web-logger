@@ -1,2 +1,446 @@
-(()=>{"use strict";var e={86:e=>{var t=function(){function e(e,t){this.prefix="[LogIndexedDBSDK] :",this.databaseName=e,this.objectStoreName=t,this.db=null}return e.prototype.openDatabase=function(){var e=this;return new Promise((function(t,o){var n=window.indexedDB.open(e.databaseName);n.onerror=function(t){var n=t.target.error;console.error("".concat(e.prefix," Failed to open database: ").concat(n)),o(n)},n.onsuccess=function(o){e.db=o.target.result,console.log("".concat(e.prefix," Open database ").concat(e.databaseName," successfully.")),t()},n.onupgradeneeded=function(t){var o=t.target.result;if(!o.objectStoreNames.contains(e.objectStoreName)){var n=o.createObjectStore(e.objectStoreName,{keyPath:"id",autoIncrement:!0});n.createIndex("byId","id",{unique:!0}),n.createIndex("byTimestamp","timestamp"),n.createIndex("byModule","module"),n.createIndex("byUserId","userId"),n.createIndex("byClientId","clientId")}}}))},e.prototype.executeQuery=function(e,t,o){var n=this;e.onsuccess=function(e){t&&t(e.target.result)},e.onerror=function(e){console.error("".concat(n.prefix," Error executing query: ").concat(e.target.error)),o&&o(e.target.error)}},e.prototype.createTransaction=function(e){return this.db.transaction(this.objectStoreName,e).objectStore(this.objectStoreName)},e.prototype.createTable=function(e,t){var o=this;return new Promise((function(n,r){o.openDatabase().then((function(){n(),e&&e()})).catch((function(e){r(e),t&&t(e)}))}))},e.prototype.insertData=function(e,t,o){var n=this;return new Promise((function(r,a){var c=n.createTransaction("readwrite").add(e);n.executeQuery(c,(function(){console.log("".concat(n.prefix," Data inserted successfully.")),r(),t&&t()}),(function(e){a(e),o&&o(e)}))}))},e.prototype.selectData=function(e,t,o){var n=this;return new Promise((function(r,a){var c,i=n.createTransaction("readonly"),s=[];console.log(e),(c=e&&e.startTime&&e.endTime?i.index("byTimestamp").openCursor(IDBKeyRange.bound(e.startTime,e.endTime)):i.openCursor()).onsuccess=function(o){var a=o.target.result;if(a){var c=a.value;e.module&&c.module!==e.module||e.level&&c.level!==e.level||e.userId&&c.userId!==e.userId||e.clientId&&c.clientId!==e.clientId||s.push(c),a.continue()}else console.log("".concat(n.prefix," Selected data:"),s),r(s),t&&t(s)},c.onerror=function(e){a(e.target.error),o&&o(e.target.error)}}))},e.prototype.updateData=function(e,t,o,n){var r=this;return new Promise((function(a,c){var i=r.createTransaction("readwrite").openCursor(IDBKeyRange.only(e));i.onsuccess=function(e){var i=e.target.result;if(i){var s=i.update(t);r.executeQuery(s,(function(){console.log("".concat(r.prefix," Data updated successfully.")),a(),o&&o()}),(function(e){c(e),n&&n(e)}))}else console.log("".concat(r.prefix," No data found for update.")),a(),o&&o()},i.onerror=function(e){c(e.target.error),n&&n(e.target.error)}}))},e.prototype.deleteData=function(e,t,o){var n=this;return new Promise((function(r,a){var c=n.createTransaction("readwrite").openCursor(IDBKeyRange.only(e));c.onsuccess=function(e){var c=e.target.result;if(c){var i=c.delete();n.executeQuery(i,(function(){console.log("".concat(n.prefix," Data deleted successfully.")),r(),t&&t()}),(function(e){a(e),o&&o(e)}))}else console.log("".concat(n.prefix," No data found for delete.")),r(),t&&t()},c.onerror=function(e){a(e.target.error),o&&o(e.target.error)}}))},e}();e.exports=t},607:function(e,t,o){var n=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});var r=n(o(86)),a=n(o(593)),c=function(){function e(e){var t=e.moduleName,o=e.Logger;this.moduleName=t,this.Logger=o}return e.prototype.info=function(e){console.log("[Info] [".concat(this.moduleName,"] ").concat(e)),this.Logger(this.moduleName,"Info",e)},e.prototype.warn=function(e){console.log("[Warn] [".concat(this.moduleName,"] ").concat(e)),this.Logger(this.moduleName,"Warn",e)},e}(),i=function(){function e(e){var t=e.CollectionName,o=void 0===t?"logs":t,n=e.DatabaseName,r=void 0===n?"MyDatabase":n,a=e.ObjectStoreName,c=void 0===a?"logs":a,i=e.UserId,s=void 0===i?"UNKNOWN":i,u=e.ClientId,l=void 0===u?"UNKNOWN":u,d=e.Modules,f=void 0===d?[]:d;this.CollectionName=o,this.DatabaseName=r,this.ObjectStoreName=c,this.UserId=s,this.ClientId=l,console.log(this.ClientId),this.prefix="[LogSystem] : ",console.log("".concat(this.prefix,"Logger initialized.")),this.connect(),this.initModules(f)}return e.prototype.connect=function(){var e=this;this.dbClient=new r.default(this.DatabaseName,this.ObjectStoreName),this.dbClient.openDatabase().then((function(){console.log("".concat(e.prefix,"Connected to IndexedDB.")),e.createTable()})).catch((function(t){console.error("".concat(e.prefix,"Error connecting to IndexedDB:"),t)}))},e.prototype.initModules=function(e){var t=this;e.forEach((function(e){t[e]=new c({moduleName:e,Logger:t.logger.bind(t)})}))},e.prototype.createTable=function(){var e=this;this.dbClient.createTable().then((function(){console.log("".concat(e.prefix,"Logs table created successfully."))})).catch((function(t){console.error("".concat(e.prefix,"Error creating logs table:"),t)}))},e.prototype.logger=function(e,t,o){var n=this,r={userId:this.UserId,clientId:this.ClientId,module:e,level:t,timestamp:a.default.getFormattedDate(),message:o,isUpload:!1,data:{key:"value"}};this.dbClient.insertData(r).then((function(){console.log("".concat(n.prefix,"Log inserted successfully."))})).catch((function(e){console.error("".concat(n.prefix,"Error inserting log:"),e)}))},e.prototype.getLogs=function(e,t,o){var n=this;this.dbClient.selectData({startTime:a.default.getFormattedDate("1970-01-01 00:00:00.000"),endTime:a.default.getFormattedDate()},t,o).then((function(e){console.log("".concat(n.prefix,"Logs retrieved successfully:"),e)})).catch((function(e){console.error("".concat(n.prefix,"Error retrieving logs:"),e)}))},e}();window.Logger=i,t.default=i},593:e=>{var t=function(){function e(){}return e.getFormattedDate=function(e){var t=e?new Date(e):new Date,o=t.getFullYear(),n=String(t.getMonth()+1).padStart(2,"0"),r=String(t.getDate()).padStart(2,"0"),a=String(t.getHours()).padStart(2,"0"),c=String(t.getMinutes()).padStart(2,"0"),i=String(t.getSeconds()).padStart(2,"0"),s=String(t.getMilliseconds()).padStart(3,"0");return"".concat(o,"-").concat(n,"-").concat(r," ").concat(a,":").concat(c,":").concat(i,".").concat(s)},e.generateRandomString=function(e){for(var t="",o=0;o<e;o++){var n=Math.floor(62*Math.random());t+="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".charAt(n)}return t},e}();e.exports=t}},t={};!function o(n){var r=t[n];if(void 0!==r)return r.exports;var a=t[n]={exports:{}};return e[n].call(a.exports,a,a.exports,o),a.exports}(607)})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./src/IndexDB.ts":
+/*!************************!*\
+  !*** ./src/IndexDB.ts ***!
+  \************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var utils_1 = __importDefault(__webpack_require__(/*! ./utils */ "./src/utils.ts"));
+var IndexedDBDatabase = /** @class */ (function () {
+    function IndexedDBDatabase(databaseName, objectStoreName, Console) {
+        this.prefix = '[LogDBSDK]  : ';
+        this.databaseName = databaseName;
+        this.objectStoreName = objectStoreName;
+        this.db = null;
+        this.Console = Console;
+    }
+    IndexedDBDatabase.prototype.openDatabase = function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var request = window.indexedDB.open(_this.databaseName);
+            request.onerror = function (event) {
+                var error = event.target.error;
+                // this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Failed to open database: ${error}`);
+                reject(error);
+            };
+            request.onsuccess = function (event) {
+                _this.db = event.target.result;
+                // this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Open database ${this.databaseName} successfully.`);
+                resolve();
+            };
+            request.onupgradeneeded = function (event) {
+                var db = event.target.result;
+                if (!db.objectStoreNames.contains(_this.objectStoreName)) {
+                    var OS = db.createObjectStore(_this.objectStoreName, { keyPath: 'id', autoIncrement: true });
+                    OS.createIndex('byId', 'id', { unique: true });
+                    OS.createIndex('byTimestamp', 'timestamp');
+                    OS.createIndex('byModule', 'module');
+                    OS.createIndex('byUserId', 'userId');
+                    OS.createIndex('byClientId', 'clientId');
+                }
+            };
+        });
+    };
+    IndexedDBDatabase.prototype.executeQuery = function (request, successCallback, errorCallback) {
+        var _this = this;
+        request.onsuccess = function (event) {
+            if (successCallback) {
+                successCallback(event.target.result);
+            }
+        };
+        request.onerror = function (event) {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, " Error executing query: ").concat(event.target.error));
+            if (errorCallback) {
+                errorCallback(event.target.error);
+            }
+        };
+    };
+    IndexedDBDatabase.prototype.createTransaction = function (mode) {
+        var transaction = this.db.transaction(this.objectStoreName, mode);
+        return transaction.objectStore(this.objectStoreName);
+    };
+    IndexedDBDatabase.prototype.createTable = function (successCallback, errorCallback) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var request = _this.openDatabase();
+            request.then(function () {
+                resolve();
+                if (successCallback) {
+                    successCallback();
+                }
+            }).catch(function (error) {
+                reject(error);
+                if (errorCallback) {
+                    errorCallback(error);
+                }
+            });
+        });
+    };
+    IndexedDBDatabase.prototype.insertData = function (data, successCallback, errorCallback) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var objectStore = _this.createTransaction('readwrite');
+            var request = objectStore.add(data);
+            _this.executeQuery(request, function () {
+                // this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Data inserted successfully.`);
+                resolve();
+                if (successCallback) {
+                    successCallback();
+                }
+            }, function (error) {
+                reject(error);
+                if (errorCallback) {
+                    errorCallback(error);
+                }
+            });
+        });
+    };
+    IndexedDBDatabase.prototype.selectData = function (condition, successCallback, errorCallback) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var objectStore = _this.createTransaction('readonly');
+            var results = [];
+            _this.Console && console.log(condition);
+            var request;
+            if (condition && condition.startTime && condition.endTime) {
+                request = objectStore.index('byTimestamp').openCursor(IDBKeyRange.bound(condition.startTime, condition.endTime));
+            }
+            else {
+                request = objectStore.openCursor();
+            }
+            request.onsuccess = function (event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    var logEntry = cursor.value;
+                    if ((!condition.module || logEntry.module === condition.module) &&
+                        (!condition.level || logEntry.level === condition.level) &&
+                        (!condition.userId || logEntry.userId === condition.userId) &&
+                        (!condition.clientId || logEntry.clientId === condition.clientId)) {
+                        results.push(logEntry);
+                    }
+                    cursor.continue();
+                }
+                else {
+                    _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, " Selected data:"), results);
+                    resolve(results);
+                    if (successCallback) {
+                        successCallback(results);
+                    }
+                }
+            };
+            request.onerror = function (event) {
+                reject(event.target.error);
+                if (errorCallback) {
+                    errorCallback(event.target.error);
+                }
+            };
+        });
+    };
+    IndexedDBDatabase.prototype.updateData = function (condition, newData, successCallback, errorCallback) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var objectStore = _this.createTransaction('readwrite');
+            var request = objectStore.openCursor(IDBKeyRange.only(condition));
+            request.onsuccess = function (event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    var updateRequest = cursor.update(newData);
+                    _this.executeQuery(updateRequest, function () {
+                        _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, " Data updated successfully."));
+                        resolve();
+                        if (successCallback) {
+                            successCallback();
+                        }
+                    }, function (error) {
+                        reject(error);
+                        if (errorCallback) {
+                            errorCallback(error);
+                        }
+                    });
+                }
+                else {
+                    _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, " No data found for update."));
+                    resolve();
+                    if (successCallback) {
+                        successCallback();
+                    }
+                }
+            };
+            request.onerror = function (event) {
+                reject(event.target.error);
+                if (errorCallback) {
+                    errorCallback(event.target.error);
+                }
+            };
+        });
+    };
+    IndexedDBDatabase.prototype.deleteData = function (condition, successCallback, errorCallback) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var objectStore = _this.createTransaction('readwrite');
+            var request = objectStore.openCursor(IDBKeyRange.only(condition));
+            request.onsuccess = function (event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    var deleteRequest = cursor.delete();
+                    _this.executeQuery(deleteRequest, function () {
+                        _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, " Data deleted successfully."));
+                        resolve();
+                        if (successCallback) {
+                            successCallback();
+                        }
+                    }, function (error) {
+                        reject(error);
+                        if (errorCallback) {
+                            errorCallback(error);
+                        }
+                    });
+                }
+                else {
+                    _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, " No data found for delete."));
+                    resolve();
+                    if (successCallback) {
+                        successCallback();
+                    }
+                }
+            };
+            request.onerror = function (event) {
+                reject(event.target.error);
+                if (errorCallback) {
+                    errorCallback(event.target.error);
+                }
+            };
+        });
+    };
+    return IndexedDBDatabase;
+}());
+module.exports = IndexedDBDatabase;
+
+
+/***/ }),
+
+/***/ "./src/index.ts":
+/*!**********************!*\
+  !*** ./src/index.ts ***!
+  \**********************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var IndexDB_1 = __importDefault(__webpack_require__(/*! ./IndexDB */ "./src/IndexDB.ts"));
+var utils_1 = __importDefault(__webpack_require__(/*! ./utils */ "./src/utils.ts"));
+var LoggerModule = /** @class */ (function () {
+    function LoggerModule(_a) {
+        var moduleName = _a.moduleName, Logger = _a.Logger, Console = _a.Console;
+        this.moduleName = moduleName;
+        this.Logger = Logger;
+        this.Console = Console;
+        this.prefix = '[LogModule] : ';
+    }
+    LoggerModule.prototype.info = function (message) {
+        var timestamp = utils_1.default.getFormattedDate();
+        // this.Console && console.log(`${timestamp} - ${this.prefix}[Info] [${this.moduleName}] ${message}`);
+        this.Console && console.log("".concat(timestamp, " - ").concat(this.prefix, "[Info] [").concat(this.moduleName, "] ").concat(message));
+        this.Logger(this.moduleName, 'Info', message);
+    };
+    LoggerModule.prototype.warn = function (message) {
+        var timestamp = utils_1.default.getFormattedDate();
+        // this.Console && console.log(`${timestamp} - ${this.prefix}[Warn] [${this.moduleName}] ${message}`);
+        this.Console && console.log("%c".concat(timestamp, " - ").concat(this.prefix, "[Warn] [").concat(this.moduleName, "] ").concat(message), 'color: orange');
+        this.Logger(this.moduleName, 'Warn', message);
+    };
+    LoggerModule.prototype.error = function (message) {
+        var timestamp = utils_1.default.getFormattedDate();
+        // this.Console && console.log(`${timestamp} - ${this.prefix}[Error] [${this.moduleName}] ${message}`);
+        this.Console && console.log("%c".concat(timestamp, " - ").concat(this.prefix, "[Error] [").concat(this.moduleName, "] ").concat(message), 'color: red');
+        this.Logger(this.moduleName, 'Error', message);
+    };
+    LoggerModule.prototype.debug = function (message) {
+        var timestamp = utils_1.default.getFormattedDate();
+        // this.Console && console.log(`${timestamp} - ${this.prefix}[Debug] [${this.moduleName}] ${message}`);
+        this.Console && console.log("%c".concat(timestamp, " - ").concat(this.prefix, "[Debug] [").concat(this.moduleName, "] ").concat(message), 'color: blue');
+        this.Logger(this.moduleName, 'Debug', message);
+    };
+    return LoggerModule;
+}());
+var Logger = /** @class */ (function () {
+    function Logger(props) {
+        var _a = props.CollectionName, CollectionName = _a === void 0 ? 'logs' : _a, _b = props.DatabaseName, DatabaseName = _b === void 0 ? 'WEB_LOGS' : _b, _c = props.ObjectStoreName, ObjectStoreName = _c === void 0 ? 'logs' : _c, _d = props.UserId, UserId = _d === void 0 ? 'UNKNOWN' : _d, _e = props.ClientId, ClientId = _e === void 0 ? 'UNKNOWN' : _e, _f = props.Modules, Modules = _f === void 0 ? [] : _f, _g = props.Mode, Mode = _g === void 0 ? 'development' : _g;
+        this.CollectionName = CollectionName;
+        this.DatabaseName = DatabaseName;
+        this.ObjectStoreName = ObjectStoreName;
+        this.UserId = UserId;
+        this.ClientId = ClientId;
+        this.Mode = Mode;
+        this.Console = this.Mode === 'development';
+        this.prefix = '[LogSystem] : ';
+        this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(this.prefix, "Logger initialized."));
+        if (!this.Console) {
+            console.log('Logger Mode is production, no logs will be printed to console.');
+        }
+        this.connect();
+        this.initModules(Modules);
+    }
+    Logger.prototype.connect = function () {
+        var _this = this;
+        this.dbClient = new IndexDB_1.default(this.DatabaseName, this.ObjectStoreName, this.Console);
+        this.dbClient
+            .openDatabase()
+            .then(function () {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, "Connected to IndexedDB."));
+            _this.createTable();
+        })
+            .catch(function (error) {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, "Error connecting to IndexedDB:"), error);
+        });
+    };
+    Logger.prototype.initModules = function (modules) {
+        var _this = this;
+        modules.forEach(function (module) {
+            _this[module] = new LoggerModule({ moduleName: module, Logger: _this.writeLogEntry.bind(_this), Console: _this.Console });
+        });
+    };
+    Logger.prototype.createTable = function () {
+        var _this = this;
+        this.dbClient
+            .createTable()
+            .then(function () {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, "Logs table created successfully."));
+        })
+            .catch(function (error) {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, "Error creating logs table:"), error);
+        });
+    };
+    Logger.prototype.writeLogEntry = function (module, level, content, timestamp) {
+        var _this = this;
+        var data = {
+            userId: this.UserId,
+            clientId: this.ClientId,
+            module: module,
+            level: level,
+            timestamp: timestamp,
+            message: content,
+            isUpload: false,
+            data: { key: 'value' }
+        };
+        this.dbClient
+            .insertData(data)
+            .then(function () {
+            // this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Log inserted successfully.`);
+        })
+            .catch(function (error) {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, "Error inserting log:"), error);
+        });
+    };
+    Logger.prototype.getFilteredLogEntries = function (condition, successCallback, errorCallback) {
+        var _this = this;
+        this.dbClient.selectData(condition = {
+            startTime: utils_1.default.getFormattedDate('1970-01-01 00:00:00.000'),
+            endTime: utils_1.default.getFormattedDate()
+        }, successCallback, errorCallback)
+            .then(function (logs) {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, "Logs retrieved successfully:"), logs);
+        })
+            .catch(function (error) {
+            _this.Console && console.log("".concat(utils_1.default.getFormattedDate(), " - ").concat(_this.prefix, "Error retrieving logs:"), error);
+        });
+    };
+    Logger.prototype.updateConfig = function (config) {
+        this.UserId = config.userId || this.UserId;
+        this.ClientId = config.clientId || this.ClientId;
+    };
+    return Logger;
+}());
+window.Logger = Logger;
+exports["default"] = Logger;
+
+
+/***/ }),
+
+/***/ "./src/utils.ts":
+/*!**********************!*\
+  !*** ./src/utils.ts ***!
+  \**********************/
+/***/ ((module) => {
+
+
+var Utils = /** @class */ (function () {
+    function Utils() {
+    }
+    Utils.getFormattedDate = function (time) {
+        var transactionDate = time
+            ? new Date(time)
+            : new Date();
+        var currentDate = transactionDate;
+        var year = currentDate.getFullYear();
+        var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        var day = String(currentDate.getDate()).padStart(2, '0');
+        var hours = String(currentDate.getHours()).padStart(2, '0');
+        var minutes = String(currentDate.getMinutes()).padStart(2, '0');
+        var seconds = String(currentDate.getSeconds()).padStart(2, '0');
+        var milliseconds = String(currentDate.getMilliseconds()).padStart(3, '0');
+        var formattedDate = "".concat(year, "-").concat(month, "-").concat(day, " ").concat(hours, ":").concat(minutes, ":").concat(seconds, ".").concat(milliseconds);
+        return formattedDate;
+    };
+    Utils.generateRandomString = function (length) {
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var result = '';
+        for (var i = 0; i < length; i++) {
+            var randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters.charAt(randomIndex);
+        }
+        return result;
+    };
+    return Utils;
+}());
+module.exports = Utils;
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.ts");
+/******/ 	
+/******/ })()
+;
 //# sourceMappingURL=bundle.js.map

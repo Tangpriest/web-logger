@@ -5,7 +5,8 @@ const Logger = new window.Logger({
 	ObjectStoreName : 'logs',
 	UserId          : 'Huangliang',
 	ClientId        : 'Huangliang-web',
-	Modules         : [ 'User', 'Order' ]
+	Modules         : [ 'User', 'Order' ],
+	Mode            : 'development'
 });
 
 function generateRandomString(length) {
@@ -22,13 +23,19 @@ function generateRandomString(length) {
 }
 
 function writeLog() {
-	Logger.User.info(generateRandomString())
-	Logger.Order.info(generateRandomString())
+	Logger.User.info(generateRandomString(50))
+	Logger.User.error(generateRandomString(50))
+	Logger.User.warn(generateRandomString(50))
+	Logger.User.debug(generateRandomString(50))
+	Logger.Order.info(generateRandomString(50))
+	Logger.Order.error(generateRandomString(50))
+	Logger.Order.warn(generateRandomString(50))
+	Logger.Order.debug(generateRandomString(50))
 }
 
 function getLog() {
 	
-	Logger.getLogs(null, (logs) => {
+	Logger.getFilteredLogEntries(null, (logs) => {
 		console.log('Retrieved logs:', logs);
 	}, (error) => {
 		console.error('Error getting logs:', error);

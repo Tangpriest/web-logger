@@ -1,15 +1,18 @@
-import { filterCondition } from './type';
+import { FilterProps } from './type';
+import Utils from './utils';
 class IndexedDBDatabase {
 	private prefix: string;
 	private databaseName: string;
 	private objectStoreName: string;
 	private db: any;
+	private Console : boolean;
 
-	constructor(databaseName: string, objectStoreName: string) {
-		this.prefix = '[LogIndexedDBSDK] :';
+	constructor(databaseName: string, objectStoreName: string, Console:boolean) {
+		this.prefix = '[LogDBSDK]  : ';
 		this.databaseName = databaseName;
 		this.objectStoreName = objectStoreName;
 		this.db = null;
+		this.Console = Console;
 	}
 
 	openDatabase() {
@@ -19,13 +22,13 @@ class IndexedDBDatabase {
 			request.onerror = (event) => {
 				const error = (event.target as IDBOpenDBRequest).error;
 
-				console.error(`${this.prefix} Failed to open database: ${error}`);
+				// this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Failed to open database: ${error}`);
 				reject(error);
 			};
 
 			request.onsuccess = (event) => {
 				this.db = (event.target as IDBOpenDBRequest).result
-				console.log(`${this.prefix} Open database ${this.databaseName} successfully.`);
+				// this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Open database ${this.databaseName} successfully.`);
 				resolve();
 			};
 
@@ -54,7 +57,7 @@ class IndexedDBDatabase {
 		};
 
 		request.onerror = (event: any) => {
-			console.error(`${this.prefix} Error executing query: ${event.target.error}`);
+			this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Error executing query: ${event.target.error}`);
 			if (errorCallback) {
 				errorCallback(event.target.error);
 			}
@@ -94,7 +97,7 @@ class IndexedDBDatabase {
 			const request = objectStore.add(data);
 
 			this.executeQuery(request, () => {
-				console.log(`${this.prefix} Data inserted successfully.`);
+				// this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Data inserted successfully.`);
 				resolve();
 
 				if (successCallback) {
@@ -110,12 +113,12 @@ class IndexedDBDatabase {
 		});
 	}
 
-	selectData(condition: filterCondition, successCallback: any, errorCallback: any) {
+	selectData(condition: FilterProps, successCallback: any, errorCallback: any) {
 		return new Promise<any[]>((resolve, reject) => {
 			const objectStore = this.createTransaction('readonly');
 			const results: any[] = [];
 
-			console.log(condition)
+			this.Console && console.log(condition)
 			let request
 
 			if (condition && condition.startTime && condition.endTime) {
@@ -143,7 +146,7 @@ class IndexedDBDatabase {
 					cursor.continue();
 				}
 				else {
-					console.log(`${this.prefix} Selected data:`, results);
+					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Selected data:`, results);
 					resolve(results);
 
 					if (successCallback) {
@@ -174,7 +177,7 @@ class IndexedDBDatabase {
 					const updateRequest = cursor.update(newData);
 
 					this.executeQuery(updateRequest, () => {
-						console.log(`${this.prefix} Data updated successfully.`);
+						this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Data updated successfully.`);
 						resolve();
 
 						if (successCallback) {
@@ -189,7 +192,7 @@ class IndexedDBDatabase {
 					});
 				}
 				else {
-					console.log(`${this.prefix} No data found for update.`);
+					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} No data found for update.`);
 					resolve();
 
 					if (successCallback) {
@@ -220,7 +223,7 @@ class IndexedDBDatabase {
 					const deleteRequest = cursor.delete();
 
 					this.executeQuery(deleteRequest, () => {
-						console.log(`${this.prefix} Data deleted successfully.`);
+						this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Data deleted successfully.`);
 						resolve();
 
 						if (successCallback) {
@@ -235,7 +238,7 @@ class IndexedDBDatabase {
 					});
 				}
 				else {
-					console.log(`${this.prefix} No data found for delete.`);
+					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} No data found for delete.`);
 					resolve();
 
 					if (successCallback) {
