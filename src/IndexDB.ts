@@ -118,7 +118,6 @@ class IndexedDBDatabase {
 			const objectStore = this.createTransaction('readonly');
 			const results: any[] = [];
 
-			this.Console && console.log(condition)
 			let request
 
 			if (condition && condition.startTime && condition.endTime) {
@@ -146,7 +145,7 @@ class IndexedDBDatabase {
 					cursor.continue();
 				}
 				else {
-					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Selected data:`, results);
+					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Selected data:`, results);
 					resolve(results);
 
 					if (successCallback) {

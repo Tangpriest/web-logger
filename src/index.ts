@@ -19,30 +19,28 @@ class LoggerModule {
 		const timestamp = Utils.getFormattedDate();
 
 		this.Console && console.log(`${ timestamp } - ${ this.prefix }[Info] [${ this.moduleName }] ${ message}`);
-		this.Logger(this.moduleName, 'Info', message);
+		this.Logger(this.moduleName, 'Info', message, timestamp);
 	}
 
 	warn(message: string) {
 		const timestamp = Utils.getFormattedDate();
 
 		this.Console && console.log(`%c${ timestamp } - ${ this.prefix }[Warn] [${ this.moduleName }] ${ message}`, 'color: orange');
-		this.Logger(this.moduleName, 'Warn', message);
+		this.Logger(this.moduleName, 'Warn', message, timestamp);
 	}
 
 	error(message: string) {
 		const timestamp = Utils.getFormattedDate();
 
-		// this.Console && console.log(`${timestamp} - ${this.prefix}[Error] [${this.moduleName}] ${message}`);
 		this.Console && console.log(`%c${ timestamp } - ${ this.prefix }[Error] [${ this.moduleName }] ${ message}`, 'color: red');
-		this.Logger(this.moduleName, 'Error', message);
+		this.Logger(this.moduleName, 'Error', message, timestamp);
 	}
 
 	debug(message: string) {
 		const timestamp = Utils.getFormattedDate();
 
-		// this.Console && console.log(`${timestamp} - ${this.prefix}[Debug] [${this.moduleName}] ${message}`);
 		this.Console && console.log(`%c${ timestamp } - ${ this.prefix }[Debug] [${ this.moduleName }] ${ message}`, 'color: blue');
-		this.Logger(this.moduleName, 'Debug', message);
+		this.Logger(this.moduleName, 'Debug', message, timestamp);
 	}
 }
 
@@ -114,6 +112,7 @@ class Logger {
 	}
 
 	writeLogEntry(module: string, level: string, content: string, timestamp : string) {
+
 		const data = {
 			userId    : this.UserId,
 			clientId  : this.ClientId,
@@ -141,12 +140,6 @@ class Logger {
 			startTime : Utils.getFormattedDate('1970-01-01 00:00:00.000'),
 			endTime   : Utils.getFormattedDate()
 		}, successCallback, errorCallback)
-			.then((logs) => {
-				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Logs retrieved successfully:`, logs);
-			})
-			.catch((error: any) => {
-				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error retrieving logs:`, error);
-			});
 	}
 
 	updateConfig(config : FilterProps) {
