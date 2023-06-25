@@ -6,15 +6,35 @@ module.exports = (env, argv) => {
 
 	const isProduction = argv.mode === 'production';
 	const mode = argv.mode || 'development';
+	const devOutputPath = path.resolve(__dirname, 'example/dist');
+	const proOutputPath = path.resolve(__dirname, 'dist');
+	const devPublicPath = path.resolve(__dirname, 'example')
+
+	const plugins = [
+		new CleanWebpackPlugin()
+	]
+
+	if (!isProduction) {
+		plugins.push(
+			new HtmlWebpackPlugin({
+				template : './example/index.html'
+			})
+		)
+	}
 	
 	return ({
 		entry   : './src/index.ts',
 		mode    :	mode,
+		// experiments : {
+		// 	outputModule : true
+		// },
 		devtool : isProduction
 			? false
 			: 'source-map',
 		output : {
-			path     : path.resolve(__dirname, 'example/dist'),
+			path : isProduction
+				? proOutputPath
+				: devOutputPath,
 			filename : 'bundle.js'
 		},
 		resolve : {
@@ -31,15 +51,10 @@ module.exports = (env, argv) => {
 				}
 			]
 		},
-		plugins : [
-			new CleanWebpackPlugin(),
-			new HtmlWebpackPlugin({
-				template : './example/index.html'
-			})
-		],
+		plugins   : plugins,
 		devServer : {
 			static : {
-				directory : path.resolve(__dirname, 'example')
+				directory : devPublicPath
 			},
 			compress : true,
 			port     : 3000

@@ -1,5 +1,6 @@
 import { FilterProps } from './type';
 import Utils from './utils';
+
 class IndexedDBDatabase {
 	private prefix: string;
 	private databaseName: string;

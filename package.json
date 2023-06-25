@@ -1,13 +1,13 @@
 {
-  "name": "logger-library",
-  "version": "0.0.1",
+  "name": "logger-hub",
+  "version": "0.0.5",
   "description": "",
-  "main": "index.js",
+  "main": "dist/bundle.js",
   "scripts": {
     "dev": "npx webpack-dev-server",
     "build": "npx webpack --mode=production"
   },
-  "author": "",
+  "author": "Leon",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.22.5",
@@ -23,5 +23,8 @@
     "webpack": "^5.87.0",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "jest": "^29.5.0"
   }
 }
