@@ -1,6 +1,6 @@
-# Logger Library
+# Logger Hub
 
-The Logger Library is a JavaScript library that provides logging capabilities for front-end web applications. It allows you to log different levels of messages (info, warn, debug, error) to the console, store them in IndexedDB, and retrieve them based on various filters.
+The LoggerHub is a JavaScript library that provides logging capabilities for front-end web applications. It allows you to log different levels of messages (info, warn, debug, error) to the console, store them in IndexedDB, and retrieve them based on various filters.
 
 ## Installation
 
@@ -9,7 +9,7 @@ To use the Logger Library in your project, you can follow these steps:
 1. Install the library using npm:
 
 ```shell
-npm install logger-library
+npm install logger-
 ```
 
 2. Import the Logger class into your project:

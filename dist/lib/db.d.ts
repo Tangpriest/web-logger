@@ -13,6 +13,7 @@ declare class IndexedDBDatabase {
     insertData(data: any, successCallback?: any, errorCallback?: any): Promise<void>;
     selectData(condition: FilterProps, successCallback: any, errorCallback: any): Promise<any[]>;
     updateData(condition: any, newData: any, successCallback: any, errorCallback: any): Promise<void>;
-    deleteData(condition: any, successCallback: any, errorCallback: any): Promise<void>;
+    deleteData(key: any, successCallback?: any, errorCallback?: any): Promise<void>;
+    deleteMultipleData(keys: any[], successCallback: any, errorCallback: any): void;
 }
 export = IndexedDBDatabase;

@@ -5,7 +5,11 @@ export interface LoggerProps {
 	UserId?: string
 	ClientId?: string
 	Modules?: string[],
-	Mode?: 'development' | 'production'
+	Terminal : string,
+	Mode?: 'development' | 'production',
+	StoragePath : string,
+	UploadIntervalTimes : number,
+	InitSuccess : () => void
 }
 
 export interface FilterProps {

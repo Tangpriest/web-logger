@@ -1,24 +1,32 @@
 const Logger = new window.Logger({
-	CollectionName  : 'logs', // Name of the collection/table in IndexedDB (optional, default: 'logs')
-	DatabaseName    : 'WEB_LOGS', // Name of the IndexedDB database (optional, default: 'WEB_LOGS')
-	ObjectStoreName : 'logs', // Name of the object store in IndexedDB (optional, default: 'logs')
-	UserId          : 'MyUserId', // User ID for log entries (optional, default: 'UNKNOWN')
-	ClientId        : 'MyClientId', // Client ID for log entries (optional, default: 'UNKNOWN')
-	Modules         : [ 'module1', 'module2' ], // List of module names (optional)
-	Mode            : 'development' // Mode of the logger (optional, default: 'development')
+	UserId      : '黄亮', // User ID for log entries (optional, default: 'UNKNOWN')
+	ClientId    : 'huangliang-web', // Client ID for log entries (optional, default: 'UNKNOWN')
+	Modules     : [ 'module1', 'module2' ], // List of module names (optional)
+	StoragePath : 'http://172.17.16.130/app/v1/logger/upload/info',
+	InitSuccess : InitSuccess
 })
+
+function InitSuccess() {
+	//
+
+	// Logger.uploadImmediately()
+}
 
 // Logger.module1.info('This is a test message')
 
 function writeLog() {
-	Logger.module1.info('This is a test message')
-	Logger.module1.debug('This is a test message')
-	Logger.module1.warn('This is a test message')
-	Logger.module1.error('This is a test message')
+	Logger.module1.info('This is a test message', { age : 19 })
+	Logger.module1.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
+	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
+	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
+	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
+	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
 }
 
 function getLog() {
-	Logger.getFilteredLogEntries({}, function(result) {
+	Logger.getFilteredLogEntries({
+		
+	}, function(result) {
 		console.log(result)
 	})
 }

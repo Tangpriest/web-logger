@@ -11,7 +11,7 @@ module.exports = (env, argv) => {
 	const devPublicPath = path.resolve(__dirname, 'example')
 
 	const plugins = [
-		new CleanWebpackPlugin()
+		
 	]
 
 	if (!isProduction) {
@@ -19,6 +19,11 @@ module.exports = (env, argv) => {
 			new HtmlWebpackPlugin({
 				template : './example/index.html'
 			})
+		)
+	}
+	else {
+		plugins.push(
+			new CleanWebpackPlugin()
 		)
 	}
 	

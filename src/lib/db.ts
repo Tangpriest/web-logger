@@ -143,10 +143,10 @@ class IndexedDBDatabase {
 						results.push(logEntry);
 					}
 
-					cursor.continue();
+					cursor.continue();	
 				}
 				else {
-					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Selected data:`, results);
+					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Selected data:`, results.length);
 					resolve(results);
 
 					if (successCallback) {
@@ -211,39 +211,17 @@ class IndexedDBDatabase {
 		});
 	}
 
-	deleteData(condition: any, successCallback: any, errorCallback: any) {
+	deleteData(key: any, successCallback?: any, errorCallback?: any) {
 		return new Promise<void>((resolve, reject) => {
 			const objectStore = this.createTransaction('readwrite');
-			const request = objectStore.openCursor(IDBKeyRange.only(condition));
+			const request = objectStore.delete(key);
 
 			request.onsuccess = (event: any) => {
-				const cursor = event.target.result;
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Data deleted successfully.`);
+				resolve();
 
-				if (cursor) {
-					const deleteRequest = cursor.delete();
-
-					this.executeQuery(deleteRequest, () => {
-						this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} Data deleted successfully.`);
-						resolve();
-
-						if (successCallback) {
-							successCallback();
-						}
-					}, (error:any) => {
-						reject(error);
-
-						if (errorCallback) {
-							errorCallback(error);
-						}
-					});
-				}
-				else {
-					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix} No data found for delete.`);
-					resolve();
-
-					if (successCallback) {
-						successCallback();
-					}
+				if (successCallback) {
+					successCallback();
 				}
 			};
 
@@ -255,6 +233,23 @@ class IndexedDBDatabase {
 				}
 			};
 		});
+	}
+	
+	deleteMultipleData(keys: any[], successCallback: any, errorCallback: any) {
+		const promises = keys.map(key => this.deleteData(key));
+
+		Promise.all(promises)
+			.then(() => {
+				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Multiple data deleted successfully.`);
+				if (successCallback) {
+					successCallback();
+				}
+			})
+			.catch(error => {
+				if (errorCallback) {
+					errorCallback(error);
+				}
+			});
 	}
 }
 
