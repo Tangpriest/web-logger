@@ -1,32 +1,48 @@
+/**
+ * Create a new instance of Logger with configuration options.
+ * - UserId: User ID for log entries (optional, default: 'UNKNOWN').
+ * - ClientId: Client ID for log entries (optional, default: 'UNKNOWN').
+ * - Modules: List of module names (optional).
+ * - StoragePath: URL for log storage.
+ * - InitSuccess: Callback function for initialization success.
+ */
 const Logger = new window.Logger({
-	UserId      : '黄亮', // User ID for log entries (optional, default: 'UNKNOWN')
-	ClientId    : 'huangliang-web', // Client ID for log entries (optional, default: 'UNKNOWN')
-	Modules     : [ 'module1', 'module2' ], // List of module names (optional)
-	StoragePath : 'http://172.17.16.130/app/v1/logger/upload/info',
+	UserId      : '周承',
+	ClientId    : 'ZhouCheng',
+	Modules     : [ 'User', 'Pay' ],
+	StoragePath : 'http://172.17.16.164',
 	InitSuccess : InitSuccess
-})
+});
 
 function InitSuccess() {
-	//
-
-	// Logger.uploadImmediately()
+	// Callback function executed on initialization success.
+	// Logger.uploadImmediately();
 }
 
-// Logger.module1.info('This is a test message')
+function log() {
+	// Example log entries using Logger methods.
 
-function writeLog() {
-	Logger.module1.info('This is a test message', { age : 19 })
-	Logger.module1.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
-	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
-	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
-	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
-	// Logger.debug('This is a test message', [ { a : 1 }, { b : 2 } ])
+	// Info log message for module1.
+	Logger.User.info('This is an info message');
+
+	// Warn log message for module1.
+	Logger.User.warn('This is a warn message');
+
+	// Debug log message for module1.
+	Logger.User.debug('This is a debug message');
+
+	// Error log message for module1.
+	Logger.Pay.error('This is an error message');
+
+	// Info log message for module1 with an object.
+	Logger.Pay.info('This is a message with an object', { name : 'name', age : 18 });
+
+	// Info log message for module2.
+	Logger.Pay.info('This is an info message', [ 'a', 'b', 'c' ]);
+
 }
 
-function getLog() {
-	Logger.getFilteredLogEntries({
-		
-	}, function(result) {
-		console.log(result)
-	})
+function upload() {
+	// Upload all log entries.
+	Logger.uploadImmediately();
 }

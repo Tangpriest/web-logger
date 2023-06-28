@@ -1,3 +1,4 @@
+import axios from 'axios';
 import IndexedDBDatabase from './lib/db';
 import LoggerModule from './lib/module';
 import OSS from './lib/storeage/oss';
@@ -47,9 +48,12 @@ class Logger {
 
 		this.StoragePath = StoragePath;
 		this.UploadIntervalTimes = UploadIntervalTimes;
-		this.OSSClient = new OSS({ StroagePath : this.StoragePath });
-		
-		this.createInterval();
+
+		if (this.StoragePath) {
+			this.OSSClient = new OSS({ StroagePath : this.StoragePath });
+			this.createInterval();
+		}
+	
 		if (!this.Console) {
 			console.log('Logger Mode is production, no logs will be printed to console.')
 		}
@@ -79,12 +83,14 @@ class Logger {
 			.createTable()
 			.then(() => {
 				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Logs table created successfully.`);
-				this.OSSClient.initClient(() => {
-					this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}OSS client initialized.`);
-					if (this.props.InitSuccess) {
-						this.props.InitSuccess()
-					}
-				})
+				if (this.StoragePath) {
+					this.OSSClient.initClient(() => {
+						this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}OSS client initialized.`);
+						if (this.props.InitSuccess) {
+							this.props.InitSuccess()
+						}
+					})
+				}
 			})
 			.catch((error: any) => {
 				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error creating logs table:`, error);
@@ -136,7 +142,7 @@ class Logger {
 			this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}StoragePath is not set, no logs will be uploaded.`);
 		}
 
-		this.UploadInterval = setTimeout(() => { this.getUploadLogs() }, this.UploadIntervalTimes)
+		this.UploadInterval = setInterval(() => { this.getUploadLogs() }, this.UploadIntervalTimes)
 	}
 
 	getUploadLogs() {
@@ -153,14 +159,14 @@ class Logger {
 				const fileName = `${this.UserId}-${this.Terminal}-${Utils.getYYYYMMDDHHMMSS()}.log`
 				const path = `${this.UserId}/${Utils.getYYYYMMDD()}/${fileName}`
 
-				this.uploadLogs(logs, path)
+				this.uploadLogs(logs, path, fileName)
 			}
 		}, (error : any) => {
 			this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error fetching logs:`, error);
 		})
 	}
 
-	async uploadLogs(logs : any, path : string) {
+	async uploadLogs(logs : any, path : string, fileName : string) {
 		try {
 			const content = this.formatLog(logs)
 
@@ -174,6 +180,8 @@ class Logger {
 			}, (error: any) => {
 				this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error deleting logs from db:`, error);
 			});
+
+			this.uploadDone(path, fileName)
 		}
 		catch (error) {
 			this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Error uploading logs:`, error);
@@ -181,7 +189,13 @@ class Logger {
 	}
 
 	uploadImmediately() {
-		this.getUploadLogs()
+
+		if (this.StoragePath) {
+			this.getUploadLogs()
+		}
+		else {
+			this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}StoragePath is not set, no logs will be uploaded.`);
+		}
 	}
 
 	formatLog(logs : any) {
@@ -193,7 +207,30 @@ class Logger {
 
 		return loggerContent
 	}
-	
+
+	async uploadDone(path : string, fileName : string) {
+		const OssConfig = this.OSSClient.getConfig()
+		const data = {
+			filename    : fileName,
+			path        : path,
+			storageType : 'oss',
+			bucket      : OssConfig.bucket,
+			username    : this.UserId,
+			displayname : this.ClientId,
+			terminal    : this.Terminal
+		}
+
+		const uploadDoneUrl = `${this.StoragePath}/app/v1/logger/upload/done`
+
+		const response = await axios.post(uploadDoneUrl, data)
+
+		if (response.data.code === 0) {
+			this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Upload done successfully.`);
+		}
+		else {
+			this.Console && console.log(`${Utils.getFormattedDate()} - ${this.prefix}Upload done failed.`);
+		}
+	}
 }
 
 declare global {

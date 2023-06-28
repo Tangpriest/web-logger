@@ -13,8 +13,9 @@ class OSSClient {
 	private client: any;
 	private Console: boolean;
 	private StoragePath: string;
+	private Config!: OSSconfig;
 
-	constructor({ StroagePath } : { StroagePath: string}) {
+	constructor({ StroagePath }: { StroagePath: string }) {
 		this.Console = true;
 		this.StoragePath = StroagePath;
 	}
@@ -23,8 +24,7 @@ class OSSClient {
 		try {
 			const config = await this.getUploadInfo();
 
-			const { region, accessKeyId, accessKeySecret, SecurityToken, bucket } =
-        config;
+			const { region, accessKeyId, accessKeySecret, SecurityToken, bucket } = config;
 
 			this.client = new OSS({
 				region          : region,
@@ -45,7 +45,7 @@ class OSSClient {
 			});
 
 			if (initSuccess) {
-				initSuccess()
+				initSuccess();
 			}
 		}
 		catch (error) {}
@@ -55,11 +55,11 @@ class OSSClient {
 		const file = new Blob(logs, { type : 'text/plain' });
 
 		await this.client.put(path, file);
-
 	}
 
 	async getUploadInfo(): Promise<OSSconfig> {
-		const response = await axios.post(this.StoragePath);
+		const getInfoPath = `${this.StoragePath}/app/v1/logger/upload/info`;
+		const response = await axios.post(getInfoPath);
 
 		if (response.data.code === 0) {
 			const {
@@ -70,17 +70,25 @@ class OSSClient {
 				bucket
 			} = response.data.data.config;
 
-			return {
+			const config = {
 				region,
 				bucket,
 				accessKeyId,
 				accessKeySecret,
 				SecurityToken
 			};
+
+			this.Config = config;
+
+			return config;
 		}
 		else {
 			throw `init oss client error: ${response.data.message}`;
 		}
+	}
+
+	getConfig() {
+		return this.Config;
 	}
 }
 

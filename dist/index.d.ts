@@ -19,9 +19,10 @@ declare class Logger {
     updateConfig(config: FilterProps): void;
     createInterval(): void;
     getUploadLogs(): void;
-    uploadLogs(logs: any, path: string): Promise<void>;
+    uploadLogs(logs: any, path: string, fileName: string): Promise<void>;
     uploadImmediately(): void;
     formatLog(logs: any): any;
+    uploadDone(path: string, fileName: string): Promise<void>;
 }
 declare global {
     interface Window {
